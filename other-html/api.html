@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Popular Movies</title>
+  <link rel="stylesheet" href="../other-css/api.css">
+  <link rel="shortcut icon" href="../image/link-fav.png" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    body {
+      background-color: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    .movie-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+    .movie {
+      background-color: #222;
+      padding: 10px;
+      border-radius: 10px;
+    }
+    .movie img {
+      width: 100%;
+      border-radius: 8px;
+    }
+    .movie h3 {
+      margin: 10px 0 5px;
+    }
+    .btn {
+      background-color: #e50914;
+      border: none;
+      padding: 8px 16px;
+      color: white;
+      margin-top: 8px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="nav-left">
+        <a href=""><img src="../image/nav-img.png" alt="" class="nav-img"></a>
+      </div>
+      <div class="nav-right">
+        <a href="./other-html/login.html"><button class="nav-btn">Login</button></a>
+        <a href="./other-html/signup.html"><button class="nav-btn">SignUp</button></a>
+        <i class="fa-solid fa-bars" onclick="displayMenu()" id="menubar-btn"></i>
+      </div>
+    </nav>
+  </header>
+  <h1>Popular Movies</h1>
+  <div class="movie-container" id="display"></div>
+</body>
+
+
+ <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBkWYDptdZdhSKiygNPljGdCfiQGGTK9As",
+    authDomain: "mobile-f4bbb.firebaseapp.com",
+    projectId: "mobile-f4bbb",
+    storageBucket: "mobile-f4bbb.firebasestorage.app",
+    messagingSenderId: "48541246163",
+    appId: "1:48541246163:web:c28d4e65e44e00d2582a26"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+
+
+
+
+
+
+
+
+
+
+    const API_KEY = "3162d73f40939581c91a25b1038f3d40";
+    const BASE_URL = "https://api.themoviedb.org/3";
+    const movieUrl = `${BASE_URL}/movie/popular?api_key=${API_KEY}`;
+
+    const display = document.getElementById("display");
+
+    const movieApi = async () => {
+      try {
+        const res = await fetch(movieUrl);
+        const data = await res.json();
+        displayData(data.results);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    const displayData = (movies) => {
+      display.innerHTML = "";
+      movies.forEach((movie) => {
+        display.innerHTML += `
+          <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}" />
+            <h3>${movie.title}</h3>
+            <p>⭐ ${movie.vote_average}</p>
+            <button class="btn" onclick="playTrailer(${movie.id})">▶️ Play Trailer</button>
+          </div>
+        `;
+      });
+    };
+
+    async function playTrailer(movieId) {
+      try {
+        const res = await fetch(`${BASE_URL}/movie/${movieId}/videos?api_key=${API_KEY}`);
+        const data = await res.json();
+        const trailer = data.results.find(video => video.type === "Trailer" && video.site === "YouTube");
+        if (trailer) {
+          window.open(`https://www.youtube.com/watch?v=${trailer.key}`, '_blank');
+        } else {
+          alert("No trailer found 😢");
+        }
+      } catch (err) {
+        console.log(err);
+        alert("Failed to fetch trailer");
+      }
+    }
+
+    movieApi();
+
+
+    function displayMenu() {
+    const existingDropdown = document.querySelector('.dropdown');
+
+    if (existingDropdown) {
+      existingDropdown.remove();
+    } else {
+      document.getElementById('menubar-btn').insertAdjacentHTML('afterend', `
+        <ul class="dropdown">
+          <div class="drop-dropdown">
+            <li class="list-dropdown"><a href="./other-html/login.html">Login</a></li>
+            <li class="list-dropdown"><a href="./other-html/signup.html">SignUp</a></li>
+          </div>
+        </ul>
+      `);
+    }
+  }
+  </script>
+</html>
