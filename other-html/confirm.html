@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Confirm Subscription</title>
+  <link rel="stylesheet" href="../other-css/confirm.css" />
+  <link rel="shortcut icon" href="../image/link-fav.png" type="image/x-icon">
+</head>
+<body>
+  <div class="subscribe-container">
+    <h2>Confirm Your Subscription</h2>
+    <div class="confirm-box">
+      <p><strong>Plan:</strong> <span id="selected-plan"></span></p>
+      <p><strong>Price:</strong> <span id="selected-price"></span></p>
+      <button id="confirmSub">Confirm & Subscribe</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBkWYDptdZdhSKiygNPljGdCfiQGGTK9As",
+      authDomain: "mobile-f4bbb.firebaseapp.com",
+      projectId: "mobile-f4bbb",
+      storageBucket: "mobile-f4bbb.appspot.com",
+      messagingSenderId: "48541246163",
+      appId: "1:48541246163:web:c28d4e65e44e00d2582a26"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth();
+
+    const planText = document.getElementById("selected-plan");
+    const priceText = document.getElementById("selected-price");
+    const confirmBtn = document.getElementById("confirmSub");
+
+    const selectedPlan = localStorage.getItem("selectedPlan");
+    const selectedPrice = localStorage.getItem("selectedPrice");
+
+    planText.textContent = selectedPlan || "No Plan";
+    priceText.textContent = selectedPrice || "N/A";
+
+    confirmBtn.addEventListener("click", () => {
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          const userRef = doc(db, "subscriptions", user.uid);
+          await setDoc(doc(db, "subscriptions", user.uid), {
+            plan: selectedPlan,
+            price: selectedPrice,
+            subscribedAt: new Date().toISOString(),
+            subscribed: true
+        });
+          localStorage.removeItem("selectedPlan");
+          localStorage.removeItem("selectedPrice");
+          window.location.href = "./main-page.html";
+        } else {
+          alert("You must be logged in to subscribe.");
+        }
+      });
+    });
+  </script>
+</body>
+</html>

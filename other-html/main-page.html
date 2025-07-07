@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>StreamVerse</title>
     <link rel="stylesheet" href="../other-css/main-page.css">
-<link rel="shortcut icon" href="./image/link-fav.png" type="image/x-icon">
+    <link rel="shortcut icon" href="" type="image/x-icon">
   <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
@@ -16,16 +16,12 @@
   <header>
     <nav>
       <div class="nav-left">
-        <img src="../image/link-fav.png" alt="" class="nav-img">
+        <img src="../image/header-img.png" alt="" class="nav-img">
         <p id="display"></p>
+      
+
       </div>
-      <div class="nav-mid">
-        <li><a href="">Home</a></li>
-        <li><a href="">Movies</a></li>
-        <li><a href="">TV Showes</a></li>
-        <li><a href="">Videos</a></li>
-        <li><a href="">Pages</a></li>
-      </div>
+      
       <div class="nav-right">
         <button id="subscribeBtn" class="nav-btn">Subscribe</button>
         <a href=""><button class="nav-btn" id="logoutButton">Logout</button></a>
@@ -33,6 +29,24 @@
       </div>
     </nav>
   </header>
+
+  <div id="dropdownContainer" class="full-nav-dropdown"></div>
+
+  <section class="hero-carousel">
+  <div class="carousel-track">
+    <img src="https://image.tmdb.org/t/p/original/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg" alt="Slide 1">
+    <img src="../image/signupbg.jpg" alt="Slide 2">
+    <img src="https://image.tmdb.org/t/p/original/yOm993lsJyPmBodlYjgpPwBjXP9.jpg" alt="Slide 3">
+  </div>
+</section>
+
+<div class="category-filter">
+  <button class="filter-btn active">All</button>
+  <button class="filter-btn">Action</button>
+  <button class="filter-btn">Drama</button>
+  <button class="filter-btn">Comedy</button>
+</div>
+
 
   <h1>Popular Movies</h1>
   <div id="show"></div>
@@ -48,32 +62,63 @@
     <iframe id="trailer-frame" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
       allowfullscreen></iframe>
   </div>
-</div>  
+</div> 
+
+<footer class="footer">
+  <div class="footer-content">
+    <div>
+      <img src="../image/link-fav.png" alt="Logo" class="footer-logo" />
+      <p>StreamVerse — Your world of entertainment.</p>
+    </div>
+    <div>
+      <h4>Explore</h4>
+      <ul>
+        <li><a href="#">Home</a></li>
+        <li><a href="#">Movies</a></li>
+        <li><a href="#">TV Shows</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Follow Us</h4>
+      <div class="social-icons">
+        <i class="fab fa-facebook"></i>
+        <i class="fab fa-twitter"></i>
+        <i class="fab fa-instagram"></i>
+      </div>
+    </div>
+  </div>
+  <p class="footer-bottom">© 2025 StreamVerse. All rights reserved.</p>
+</footer>
+
 </body>
 <script type="module">
   
-document.getElementById("menubar-btn").addEventListener("click", () => {
-  const existingDropdown = document.querySelector('.dropdown');
+const menubarBtn = document.getElementById("menubar-btn");
+const dropdownContainer = document.getElementById("dropdownContainer");
 
-    if (existingDropdown) {
-      existingDropdown.remove();
-    } else {
-      document.getElementById('menubar-btn').insertAdjacentHTML('afterend', `
-        <ul class="dropdown">
-          <div class="drop-dropdown">
-            <li class="list-dropdown"><a href="">Subscribe</a></li>
-            <li class="list-dropdown"><a href="" id="logoutButton">Logout</a></li>
-          </div>
-        </ul>
-      `);
-    }
-})
+menubarBtn.addEventListener("click", () => {
+  if (dropdownContainer.style.display === "flex") {
+    dropdownContainer.style.display = "none";
+  } else {
+    dropdownContainer.innerHTML = `
+      <a href="#">Home</a>
+      <a href="#">Movies</a>
+      <a href="#">TV Shows</a>
+      <a href="#">Videos</a>
+      <a href="#">Pages</a>
+    `;
+    dropdownContainer.style.display = "flex";
+  }
+});
 
 
 
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-storage.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBkWYDptdZdhSKiygNPljGdCfiQGGTK9As",
@@ -87,22 +132,44 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebas
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
+  const db = getFirestore(app);
 
   const display = document.getElementById("display");
   const logoutButton = document.getElementById("logoutButton");
 
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-        const username = user.displayName || user.email.split('@')[0];
+  onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    const username = user.displayName || user.email.split('@')[0];
     const profileImage = user.photoURL || 'https://i.imgur.com/6VBx3io.png'; 
-        display.innerHTML = `<div style="display: flex; align-items: center; gap: 10px;">
-        <img src="${profileImage}" alt="Profile" style="width: 40px; height: 40px; border-radius: 50%;">
-        <h3 style="margin: 0; font-weight: 500;">${user.displayName || "User"}</h3>
-      </div>`;
-    }else {
-        display.innerHTML = `<h1>Not logged in</h1>`
+
+   display.innerHTML = `
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <img src="${profileImage}" id="clickableProfileImg" alt="Profile"
+         style="width: 40px; height: 40px; border-radius: 50%; cursor: pointer;">
+    <h3 style="margin: 0; font-weight: 500;">${username}</h3>
+    <input type="file" id="profilePicInput" accept="image/*" style="display: none;">
+  </div>
+`;
+
+
+    // 🔥 Check if user is subscribed
+    const userRef = doc(db, "subscriptions", user.uid);
+    const userSnap = await getDoc(userRef);
+
+    const subscribeBtn = document.getElementById("subscribeBtn");
+    if (userSnap.exists() && userSnap.data().subscribed === true) {
+      // hide button if subscribed
+      if (subscribeBtn) subscribeBtn.style.display = "none";
+    } else {
+      // show button if not subscribed
+      if (subscribeBtn) subscribeBtn.style.display = "inline-block";
     }
-  });
+
+  } else {
+    display.innerHTML = `<h1>Not logged in</h1>`;
+  }
+});
+
 
   logoutButton.addEventListener("click", async () => {
     try {
@@ -156,8 +223,8 @@ subscribeBtn.addEventListener("click", () => {
       <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}" />
       <h3>${movie.title}</h3>
       <p>⭐ ${movie.vote_average}</p>
-      <button class="btn trailer-btn">▶️ Play Trailer</button>
-      <button class="btn add-btn">➕ Add to Playlist</button>
+      <button class="btn trailer-btn"><i class="fa-solid fa-play"></i> Play Trailer</button>
+      <button class="btn add-btn"><i class="fa-solid fa-plus"></i> Add to Playlist</button>
     `;
 
     const playBtn = movieElement.querySelector(".trailer-btn");
@@ -245,5 +312,57 @@ window.removeFromPlaylist = (index) => {
   localStorage.setItem("playlist", JSON.stringify(playlist));
   renderPlaylist();
 };
+
+let currentSlide = 0;
+const slides = document.querySelectorAll('.carousel-track img');
+const track = document.querySelector('.carousel-track');
+
+function goToSlide(slideIndex) {
+  currentSlide = slideIndex;
+  const slideWidth = slides[0].clientWidth;
+  track.style.transform = `translateX(-${slideWidth * slideIndex}px)`;
+}
+
+setInterval(() => {
+  currentSlide = (currentSlide + 1) % slides.length;
+  goToSlide(currentSlide);
+}, 4000);
+
+const storage = getStorage(app);
+
+document.addEventListener("click", (e) => {
+  if (e.target.id === "clickableProfileImg") {
+    document.getElementById("profilePicInput").click();
+  }
+});
+
+document.addEventListener("change", async (e) => {
+  if (e.target.id === "profilePicInput") {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const user = auth.currentUser;
+    if (!user) return alert("You must be logged in.");
+
+    try {
+      const storageRef = ref(storage, `profile-pictures/${user.uid}`);
+      await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(storageRef);
+
+      // Save URL to Firestore (users collection)
+      const userDocRef = doc(db, "users", user.uid);
+      await setDoc(userDocRef, { photoURL: downloadURL }, { merge: true });
+
+      // ✅ Update the image instantly on screen
+      document.getElementById("clickableProfileImg").src = downloadURL;
+      alert("Profile picture updated!");
+    } catch (err) {
+      console.error(err);
+      alert("Upload failed. Try again.");
+    }
+  }
+});
+
+
 </script>
 </html>

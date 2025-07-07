@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Choose Your Plan | StreamVerse</title>
+  <link rel="stylesheet" href="../other-css/subscribe.css" />
+  <link rel="shortcut icon" href="../image/link-fav.png" type="image/x-icon">
+</head>
+<body>
+  <header>
+    <h1>Choose Your Subscription</h1>
+  </header>
+
+  <section class="plans">
+    <div class="plan-card" data-plan="basic">
+      <h2>Basic</h2>
+      <p>₦1,500 / Month</p>
+      <ul>
+        <li>480p Streaming</li>
+        <li>1 Screen</li>
+      </ul>
+      <button class="select-plan-btn">Select</button>
+    </div>
+
+    <div class="plan-card" data-plan="standard">
+      <h2>Standard</h2>
+      <p>₦2,500 / Month</p>
+      <ul>
+        <li>1080p Streaming</li>
+        <li>2 Screens</li>
+      </ul>
+      <button class="select-plan-btn">Select</button>
+    </div>
+
+    <div class="plan-card" data-plan="premium">
+      <h2>Premium</h2>
+      <p>₦3,500 / Month</p>
+      <ul>
+        <li>4K Streaming</li>
+        <li>4 Screens</li>
+      </ul>
+      <button class="select-plan-btn">Select</button>
+    </div>
+  </section>
+
+  <script type="module">
+  const buttons = document.querySelectorAll('.select-plan-btn');
+
+  const planPrices = {
+    basic: '₦1,500 / Month',
+    standard: '₦2,500 / Month',
+    premium: '₦3,500 / Month'
+  };
+
+  buttons.forEach(button => {
+    button.addEventListener('click', () => {
+      const card = button.closest('.plan-card');
+      const selectedPlan = card.getAttribute('data-plan');
+      const selectedPrice = planPrices[selectedPlan];
+
+      localStorage.setItem('selectedPlan', selectedPlan);
+      localStorage.setItem('selectedPrice', selectedPrice);
+
+      window.location.href = './confirm.html';
+    });
+  });
+</script>
+
+</body>
+</html>

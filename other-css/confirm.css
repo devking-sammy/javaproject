@@ -1,0 +1,61 @@
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background-color: #0f0f0f;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.subscribe-container {
+  background-color: #1a1a1a;
+  padding: 30px 25px;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+}
+
+.subscribe-container h2 {
+  color: #00ffff;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.subscribe-container p {
+  font-size: 16px;
+  line-height: 1.8;
+  margin-bottom: 25px;
+  color: #ccc;
+}
+
+.subscribe-container strong {
+  color: #00ffff;
+}
+
+#confirmSub {
+  background: linear-gradient(to right, #ff00cc, #00ffff);
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+#confirmSub:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 10px #00ffffaa;
+}
