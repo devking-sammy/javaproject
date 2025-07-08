@@ -89,6 +89,9 @@
   </div>
   <p class="footer-bottom">© 2025 StreamVerse. All rights reserved.</p>
 </footer>
+<button id="backToTopBtn" title="Go to top">
+  <i class="fa-solid fa-arrow-up"></i>
+</button>
 
 </body>
 <script type="module">
@@ -152,6 +155,10 @@ menubarBtn.addEventListener("click", () => {
     } catch (err) {
       console.error("Error fetching photoURL:", err);
     }
+    const storedPic = localStorage.getItem("profilePic");
+    if (storedPic) {
+    profileImage = storedPic;
+  }
 
     display.innerHTML = `
   <div style="display: flex; align-items: center; gap: 10px;">
@@ -170,30 +177,23 @@ menubarBtn.addEventListener("click", () => {
       fileInput.click();
     });
 
-    fileInput.addEventListener("change", async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+    fileInput.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = () => {
-        clickableImg.src = reader.result;
-      };
-      reader.readAsDataURL(file);
+  const reader = new FileReader();
+  reader.onload = () => {
+    const base64Image = reader.result;
 
-      try {
-        const storageRef = ref(storage, `profile-pictures/${user.uid}`);
-        await uploadBytes(storageRef, file);
-        const downloadURL = await getDownloadURL(storageRef); // <- define it here
+    // Update the image src
+    clickableImg.src = base64Image;
 
-        // Save to Firestore
-        const userDocRef = doc(db, "users", user.uid);
-        await setDoc(userDocRef, { photoURL: downloadURL }, { merge: true });
-        alert("✅ Profile picture updated!");
-      } catch (err) {
-        console.error(err);
-        alert("❌ Upload failed.");
-      }
-    });
+    // Save to localStorage
+    localStorage.setItem("profilePic", base64Image);
+    alert("✅ Profile picture saved successfully");
+  };
+  reader.readAsDataURL(file);
+});
 
     // Subscription status check
     const userRef = doc(db, "subscriptions", user.uid);
@@ -412,5 +412,21 @@ setInterval(() => {
 //     }
 //   }
 // });
+// Show button when scrolled down
+const backToTopBtn = document.getElementById("backToTopBtn");
+
+window.addEventListener("scroll", () => {
+  if (window.scrollY > 300) {
+    backToTopBtn.style.display = "block";
+  } else {
+    backToTopBtn.style.display = "none";
+  }
+});
+
+// Scroll to top when clicked
+backToTopBtn.addEventListener("click", () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
 </script>
 </html>

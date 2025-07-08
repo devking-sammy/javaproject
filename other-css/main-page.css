@@ -268,6 +268,32 @@
   66% { transform: translateX(-200vw); }
   100% { transform: translateX(0); }
 }
+#backToTopBtn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 999;
+  background: linear-gradient(to right, #ff00cc, #00ffff); /* Matches nav-btn */
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  display: none;
+  box-shadow: 0 0 10px #00ffff66;
+  transition: all 0.3s ease;
+}
+
+#backToTopBtn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 12px #00ffff99;
+}
+
+
+
+
  /* Hero Section media query */
 @media(max-width: 430px){
   #display div h3{
