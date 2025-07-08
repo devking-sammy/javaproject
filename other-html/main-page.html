@@ -124,7 +124,7 @@ menubarBtn.addEventListener("click", () => {
     apiKey: "AIzaSyBkWYDptdZdhSKiygNPljGdCfiQGGTK9As",
     authDomain: "mobile-f4bbb.firebaseapp.com",
     projectId: "mobile-f4bbb",
-    storageBucket: "mobile-f4bbb.firebasestorage.app",
+    storageBucket: "mobile-f4bbb.appspot.com",
     messagingSenderId: "48541246163",
     appId: "1:48541246163:web:c28d4e65e44e00d2582a26"
   };
@@ -133,6 +133,7 @@ menubarBtn.addEventListener("click", () => {
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
+  const storage = getStorage(app);
 
   const display = document.getElementById("display");
   const logoutButton = document.getElementById("logoutButton");
@@ -140,19 +141,19 @@ menubarBtn.addEventListener("click", () => {
   onAuthStateChanged(auth, async (user) => {
   if (user) {
     const username = user.displayName || user.email.split('@')[0];
-    let profileImage = 'https://i.imgur.com/6VBx3io.png'; // fallback
+    let profileImage = "https://ui-avatars.com/api/?name=User&background=random";
 
-try {
-  const userDocRef = doc(db, "users", user.uid);
-  const userDocSnap = await getDoc(userDocRef);
-  if (userDocSnap.exists() && userDocSnap.data().photoURL) {
-    profileImage = userDocSnap.data().photoURL;
-  }
-} catch (err) {
-  console.error("Error fetching photoURL:", err);
-}
+    try {
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+      if (userDocSnap.exists() && userDocSnap.data().photoURL) {
+      profileImage = userDocSnap.data().photoURL;
+    }
+    } catch (err) {
+      console.error("Error fetching photoURL:", err);
+    }
 
-   display.innerHTML = `
+    display.innerHTML = `
   <div style="display: flex; align-items: center; gap: 10px;">
     <img src="${profileImage}" id="clickableProfileImg" alt="Profile"
          style="width: 40px; height: 40px; border-radius: 50%; cursor: pointer;">
@@ -161,17 +162,47 @@ try {
   </div>
 `;
 
+    // ✅ BIND EVENTS AFTER elements are rendered
+    const clickableImg = document.getElementById("clickableProfileImg");
+    const fileInput = document.getElementById("profilePicInput");
 
-    // 🔥 Check if user is subscribed
+    clickableImg.addEventListener("click", () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        clickableImg.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+
+      try {
+        const storageRef = ref(storage, `profile-pictures/${user.uid}`);
+        await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(storageRef); // <- define it here
+
+        // Save to Firestore
+        const userDocRef = doc(db, "users", user.uid);
+        await setDoc(userDocRef, { photoURL: downloadURL }, { merge: true });
+        alert("✅ Profile picture updated!");
+      } catch (err) {
+        console.error(err);
+        alert("❌ Upload failed.");
+      }
+    });
+
+    // Subscription status check
     const userRef = doc(db, "subscriptions", user.uid);
     const userSnap = await getDoc(userRef);
 
     const subscribeBtn = document.getElementById("subscribeBtn");
     if (userSnap.exists() && userSnap.data().subscribed === true) {
-      // hide button if subscribed
       if (subscribeBtn) subscribeBtn.style.display = "none";
     } else {
-      // show button if not subscribed
       if (subscribeBtn) subscribeBtn.style.display = "inline-block";
     }
 
@@ -179,6 +210,7 @@ try {
     display.innerHTML = `<h1>Not logged in</h1>`;
   }
 });
+
 
 
   logoutButton.addEventListener("click", async () => {
@@ -338,41 +370,47 @@ setInterval(() => {
   goToSlide(currentSlide);
 }, 4000);
 
-const storage = getStorage(app);
+// const storage = getStorage(app);
 
-document.addEventListener("click", (e) => {
-  if (e.target.id === "clickableProfileImg") {
-    document.getElementById("profilePicInput").click();
-  }
-});
+// // When image is clicked, trigger the hidden input
+// document.addEventListener("click", (e) => {
+//   if (e.target.id === "clickableProfileImg") {
+//     document.getElementById("profilePicInput").click();
+//   }
+// });
 
-document.addEventListener("change", async (e) => {
-  if (e.target.id === "profilePicInput") {
-    const file = e.target.files[0];
-    if (!file) return;
+// // When file is selected
+// document.addEventListener("change", async (e) => {
+//   if (e.target.id === "profilePicInput") {
+//     const file = e.target.files[0];
+//     if (!file) return;
 
-    const user = auth.currentUser;
-    if (!user) return alert("You must be logged in.");
+//     const reader = new FileReader();
+//     reader.onload = () => {
+//       // Preview the image before upload
+//       document.getElementById("clickableProfileImg").src = reader.result;
+//     };
+//     reader.readAsDataURL(file);
 
-    try {
-      const storageRef = ref(storage, `profile-pictures/${user.uid}`);
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
+//     // Now upload to Firebase
+//     const user = auth.currentUser;
+//     if (!user) return alert("You must be logged in.");
 
-      // Save URL to Firestore (users collection)
-      const userDocRef = doc(db, "users", user.uid);
-      await setDoc(userDocRef, { photoURL: downloadURL }, { merge: true });
+//     try {
+//       const storageRef = ref(storage, `profile-pictures/${user.uid}`);
+//       await uploadBytes(storageRef, file);
+//       const downloadURL = await getDownloadURL(storageRef);
 
-      // ✅ Update the image instantly on screen
-      document.getElementById("clickableProfileImg").src = downloadURL;
-      alert("Profile picture updated!");
-    } catch (err) {
-      console.error(err);
-      alert("Upload failed. Try again.");
-    }
-  }
-});
+//       // Save to Firestore
+//       const userDocRef = doc(db, "users", user.uid);
+//       await setDoc(userDocRef, { photoURL: downloadURL }, { merge: true });
 
-
+//       alert("✅ Profile picture updated!");
+//     } catch (err) {
+//       console.error(err);
+//       alert("❌ Upload failed.");
+//     }
+//   }
+// });
 </script>
 </html>
